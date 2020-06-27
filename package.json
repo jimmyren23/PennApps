@@ -1,11 +1,12 @@
 {
-  "homepage": "https://jimmyren23.github.io/PennApps",
+  "homepage": "https://jimmyren23.github.io/PennApps/",
   "name": "PennApps",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
+    "build": "react-scripts build",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
