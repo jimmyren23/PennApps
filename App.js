@@ -1,82 +1,110 @@
-import React from 'react';
-import { FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, View, Text, Image, ScrollView, TextInput} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, Text, TouchableOpacity, FlatList, TextInput, Button} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { v4 as uuidv4 } from 'uuid';
 
-export default class Source extends React.Component {
-static navigationOptions = ({ navigation }) => {
-return {
-  title: "Source Listing",
-  headerStyle: {backgroundColor: "#fff"},
-  headerTitleStyle: {textAlign: "center",flex: 1}
- };
-};
+const memberList = [
+  {
+    id: '1',
+    name: "Jimmy",
+    email: "jimbuscus23@gmail.com",
+    school: "upenn"
+  },
+  {
+    id: '2',
+    name: "Jimmy",
+    email: "jimbuscus23@gmail.com",
+    school: "upenn"
+  },
+  {
+    id: '3',
+    name: "Jimmy",
+    email: "jimbuscus23@gmail.com",
+    school: "upenn"
+  }
+];
 
-constructor(props) {
- super(props);
- this.state = {
-   loading: true,
-   dataSource:[]
-  };
-}
 
-componentDidMount(){
-fetch("https://my-json-server.typicode.com/jimmyren23/PennApp/db")
-.then(response => response.json())
-.then((responseJson)=> {
-  this.setState({
-   loading: false,
-   dataSource: responseJson.team
-  })
-})
-.catch(error=>console.log(error)) //to catch the errors if any
-}
-
-FlatListItemSeparator = () => {
+function HomeScreen({ navigation, route }) {
+  const [members, setMembers] = useState(memberList);
+  React.useEffect(() => {
+  if (route.params?.name) {
+    const { name } = route.params;
+    setMembers(memberList => [...memberList, { name }]);
+  }
+}, [route.params?.name]);
   return (
-    <View style={{
-       height: .5,
-       width:"100%",
-       backgroundColor:"rgba(0,0,0,0.5)",
-  }}
-  />
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <FlatList
+        data={members}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => navigation.navigate('Details', item)}>
+            <Text>{item.name}</Text>
+            <Text>{item.email} </Text>
+            <Text>{item.school}</Text>
+           </TouchableOpacity>
+        )}
+        keyExtractor={item => item.name}
+      />
+      <Button onPress={() => navigation.navigate('Addition', setMembers)} title="Addition"/>
+    </View>
   );
-  }
-  renderItem=(data)=>
-  <TouchableOpacity style={styles.list}>
-  <Text style={styles.lightText}>{data.item.name}</Text>
-  <Text style={styles.lightText}>{data.item.email}</Text>
-  <Text style={styles.lightText}>{data.item.school}</Text></TouchableOpacity>
-  render(){
-   if(this.state.loading){
-    return(
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#0c9"/>
-      </View>
-  )}
-  return(
-   <View style={styles.container}>
-   <FlatList
-      data= {this.state.dataSource}
-      ItemSeparatorComponent = {this.FlatListItemSeparator}
-      renderItem= {item=> this.renderItem(item)}
-      keyExtractor= {item=>item.id.toString()}
-   />
-  </View>
-  )}
-  }
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff"
-     },
-    loader:{
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "#fff"
-     },
-    list:{
-      paddingVertical: 4,
-      margin: 5,
-      backgroundColor: "#fff"
-     }
-  });
+}
+
+function DetailsScreen({ route, navigation }) {
+  const { name } = route.params;
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text> { name }</Text>
+    </View>
+  );
+}
+
+function AdditionScreen({ route, navigation}) {
+  const [name, setName] = useState();
+  const [email, setEmail] = useState();
+  const [school, setSchool] = useState();
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text> Name </Text>
+      <TextInput
+        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setName(text)}
+        value={name}
+      />
+      <Text> Email </Text>
+      <TextInput
+        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setEmail(text)}
+        value={email}
+      />
+      <Text> School </Text>
+      <TextInput
+        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setSchool(text)}
+        value={school}
+      />
+      <Button
+        title="Submit"
+        onPress={() => {navigation.navigate('Home', { name })}}
+      />
+    </View>
+  );
+}
+
+const Stack = createStackNavigator();
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Addition" component={AdditionScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Details" component={DetailsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default App;
